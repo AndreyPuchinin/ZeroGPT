@@ -25,11 +25,11 @@ v - check_some_cards
 v - add_one_card
 v - add_some_cards
 
-x - find_card_by_name
-x - find_card_by_value
+v - find_card_by_name
+v - find_card_by_value
 
-x - remove_card_by_name
-x - remove_card_by_value
+v - remove_card_by_name
+v - remove_card_by_value
 
 
 
