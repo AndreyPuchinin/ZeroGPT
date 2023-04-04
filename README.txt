@@ -17,7 +17,7 @@ v - exchange_value
 ----------------
 
 ~ - CardMenager 0.1:
-x - Протестировать!!!
+v - Протестировать!!!
 
 v - check_one_card
 v - check_some_cards

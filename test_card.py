@@ -37,7 +37,7 @@ class TestCard(unittest.TestCase):
     def test_delete_one_value(self):
         card = Card("Test Card", ["Value 1", "Value 2", "Value 3"])
         card.delete_one_value("Value 2")
-        self.assertNotIn("Value 2", card.values)
+        self.assertNotIn("Value 2", [value['value'] for value in card.values])
 
     def test_delete_some_values(self):
         card = Card('name1', ['A', 'K', 'Q', 'J', '10'])
@@ -49,8 +49,8 @@ class TestCard(unittest.TestCase):
     def test_exchange_value(self):
         card = Card("Test Card", ["Value 1", "Value 2", "Value 3"])
         card.exchange_value("Value 2", "Value 4")
-        self.assertNotIn("Value 2", card.values)
-        self.assertIn("Value 4", card.values)
+        self.assertNotIn("Value 2", [value['value'] for value in card.values])
+        self.assertIn("Value 4", [value['value'] for value in card.values])
 
 
 if __name__ == '__main__':
