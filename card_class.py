@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 
 
 class Card:
@@ -6,8 +6,8 @@ class Card:
 
     def __init__(self, name: str, values: List[str]):
         """
-        Создает новую карточку, предварительно заранее проверив корректность входных знаений
-        (ГДЕ ПРОВЕРКА???)
+        Создает новую карточку, предварительно заранее проверив корректность входных значений
+        (ПОЧИНИТЬ ПРОВЕРКУ!!!)
 
         Args:
             name: Имя карточки.
@@ -28,8 +28,7 @@ class Card:
             self.values.append({'value': value, 'flags': value_flags})
 
         # убеждаемся в корректности карты
-        # if False in self.check_some_values(self.get_values_without_flags()):
-        #     False
+        # self.check_some_values(self.get_values_without_flags())
 
     def get_values_with_flags(self) -> list[dict[str, dict[str, None | bool] | str]]:
         """
@@ -38,11 +37,11 @@ class Card:
         Returns:
             Список значений с флагами.
 
-        # ПЕРЕПИСАТЬ ПРИМЕРЫ ДЛЯ flag[...] is not None!!!
         Examples:
             >>> card = Card("Card 1", ["Value 1", "Value 2"])
             >>> card.get_values_with_flags()
-            [{'value': 'Value 1', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
+            [\
+{'value': 'Value 1', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
 {'value': 'Value 2', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}]
         """
         return self.values
@@ -58,58 +57,60 @@ class Card:
         >>> card.get_values_without_flags()
         ['Value 1', 'Value 2']
 
-        >>> card2 = Card("Test Card 2", ['Value 3', 'Value 4'])
-        >>> card2.get_values_without_flags()
-        ['Value 3', 'Value 4']
-
         >>> card3 = Card("Test Card 3", [])
         >>> card3.get_values_without_flags()
         []
         """
         return [value['value'] for value in self.values]
 
-    def check_one_value(self, value: str) -> bool:
-        """Проверяет, может ли данное значение value быть использовано для создания карты.
+    def check_one_value(self, value: str) -> bool | None:  # нужен ли здесь None?
+        """
+        Проверяет, может ли данное значение value быть использовано для создания карты.
+        Более подробные условия смотри ниже в реализации функции.
 
         Args:
             value: строка, значение, которое нужно проверить.
 
         Returns:
-            Если значение value пустое, то возвращает False.
-            Если значение value уже есть в карте или входит в имя карты, то возвращает False.
+            Если значение value пустое, то кидает исключение ValueError (см. ниже).
+            Если значение value уже есть в карте или входит в имя карты, то кидает исключение ValueError (см. ниже).
             Если же данное значение может быть использовано для создания карты, возвращает True.
 
         Examples:
             >>> card = Card("Test Card", ["Value 1", "Value 2"])
             >>> card.check_one_value("Value 1")
-            False
-            >>> card.check_one_value("Value 2")
-            False
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The value 'Value 1' is already in card.
             >>> card.check_one_value("Value 3")
             True
             >>> card.check_one_value("Test")
-            False
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The name 'Test Card' shouldn't contain the value Test.
             >>> card.check_one_value("")
-            False
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! Empty value.
         """
 
         # Проверяем, если значение пустое, то оно не может быть использовано.
         if value == "":
-            return False
+            raise ValueError("Error! Empty value.")
 
         # Проверяем, если значение уже есть в списке значений карты, то оно не может быть использовано повторно.
         for val in self.values:
             if value == val['value']:
-                return False
+                raise ValueError(f'Error! The value \'{value}\' is already in card.')
 
         # Проверяем, если значение входит в имя карты, то оно не может быть использовано.
         if value in self.name:
-            return False
+            raise ValueError(f'Error! The name \'{self.name}\' shouldn\'t contain the value {value}.')
 
         # Если значение не повторяется в списке значений карты и не входит в имя карты, то оно может быть использовано.
         return True
 
-    def check_some_values(self, values: List[str]) -> List[bool]:
+    def check_some_values(self, values: List[str]) -> bool | None:  # нужен ли здесь None?
         """
         Проверяет, являются ли все значения из списка допустимыми для данной карты.
 
@@ -117,29 +118,54 @@ class Card:
             values (List[str]): список значений, которые необходимо проверить.
 
         Returns:
-            List[bool]: список значений True и False для каждого добавляемого значения
-            в порядке их следования в параметрах.
+            True - если все значения допустимы
+            Иначе - выбрасывает иключение из check_one_value()
 
         Examples:
             >>> card = Card('name1', ['A', 'K', 'Q', 'J', '10'])
             >>> card.check_some_values(['A', '10'])
-            [False, False]
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The value A is already in card.
             >>> card.check_some_values(['K', '9'])
-            [False, True]
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The value K is already in card.
             >>> card.check_some_values(['7', '8', '9'])
-            [True, True, True]
+            True
         """
-        return [self.check_one_value(value) for value in values]
+        for value in values:
+            self.check_one_value(value)
+        return True
 
-    def add_one_value(self, value: str) -> bool:
+    def add_one_value(self, value: str) -> bool | None:  # нужен ли здесь None?
         """
         Добавляет одно значение в карту, если оно может быть добавлено.
+        Кидает исключение, если значеие не может быть добавлено.
 
         Args:
             value (str): Значение, которое нужно добавить в карту.
 
         Returns:
-            bool: True, если значение было успешно добавлено, False в противном случае.
+            bool: True, если значение было успешно добавлено.
+            Иначе - выбрасывает иключение из check_one_value()
+
+        Examples:
+            >>> card = Card("Test Card", ["Value 1", "Value 2"])
+            >>> card.add_one_value("Value 1")
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The value 'Value 1' is already in card.
+            >>> card.add_one_value("Test")
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The name 'Test Card' shouldn\'t contain the value Test.
+            >>> card.add_one_value("")
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! Empty value.
+            >>> card.add_one_value("Value 3")
+            True
         """
 
         value_flags = {
@@ -152,26 +178,35 @@ class Card:
             # Значение может быть добавлено в карту.
             self.values.append({'value': value, 'flags': value_flags})
             return True
-        else:
-            # Значение не может быть добавлено в карту.
-            return False
+        # else НЕ НУЖЕН - есть исключения из check_one_value()
+        # else:
+        #    # Значение не может быть добавлено в карту.
+        #    return False
 
-    def add_some_values(self, values: List[str]) -> List[bool]:
+    def add_some_values(self, values: List[str]) -> bool | None:  # нужен ли здесь None?
         """
-        Добавляет список значений в список значений карты, используя add_one_value для каждого значения.
+        Добавляет список значений в список значений карты, проверяя каждое значение на корректность.
+        Если значение некорректно, кидается исключение, и это значние не добавляется.
 
         Args:
             values: Список значений, которые нужно добавить.
 
         Returns:
-            Список из значений True и False для каждого добавляемого значения в порядке их следования в параметрах.
+            True, если все значения были успешно добавлены.
+            Иначе - выбрасывает иключение из check_one_value()
 
         Examples:
             >>> card = Card('name1', ['A', 'K', 'Q', 'J', '10'])
             >>> card.add_some_values(['A', 'K', 'Q'])
-            [False, False, False]
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The value 'A' is already in card.
             >>> card.add_some_values(['J', '10', '9'])
-            [False, False, True]
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The value 'J' is already in card.
+            >>> card.add_some_values(['9'])
+            True
             >>> card.get_values_with_flags()
             [\
 {'value': 'A', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
@@ -181,15 +216,11 @@ class Card:
 {'value': '10', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
 {'value': '9', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}]
         """
-        results = []
         for value in values:
-            if self.add_one_value(value):
-                results.append(True)
-            else:
-                results.append(False)
-        return results
+            self.add_one_value(value)
+        return True
 
-    def delete_one_value(self, value: str) -> bool:
+    def delete_one_value(self, value: str) -> bool | None:  # нужен ли здесь None?
         """
         Удаляет значение из списка значений карты.
 
@@ -197,50 +228,61 @@ class Card:
             value (str): Значение, которое нужно удалить из карты.
 
         Returns:
-            bool: True, если значение было успешно удалено, False в противном случае.
+            bool: True, если значение было успешно удалено
+            Иначе - выбрасывает собсвтенное иключение.
+            # Уточнить тип исключения! (сейчас просто Exception)
 
         Examples:
             >>> card = Card("Test Card", ["Value 1", "Value 2", "Value 3"])
+            >>> card.delete_one_value("")
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! Empty value.
+            >>> card.delete_one_value("Value 4")
+            Traceback (most recent call last):
+            ...
+            Exception: Error! No 'Value 4' value in card.
             >>> card.delete_one_value("Value 2")
             True
-            >>> "Value 2" in [value['value'] for value in card.values]
-            False
         """
+        if value == '':
+            raise ValueError('Error! Empty value.')
         for item in self.values:
             if item['value'] == value:
                 self.values.remove(item)
                 return True
-        return False
+        raise Exception(f'Error! No \'{value}\' value in card.')  # какого типа лучше бросить исключение?
 
-    def delete_some_values(self, values: List[str]) -> List[bool]:
+    def delete_some_values(self, values: List[str]) -> bool | None:  # нужен ли здесь None?
         """
-        Удаляет список значений из карты.
+        Удаляет список значений из карты, если они могут быть удалены.
+        В противном случае кидает исключение.
 
         Args:
             values: Список значений, которые нужно удалить.
 
         Returns:
-            Список значений True и False для каждого значения в порядке их следования в параметрах.
+            True, если все значения были успешно удалены.
+            Иначе - выбрасывает иключение из delete_one_value()
 
         Examples:
             >>> card = Card('name1', ['A', 'K', 'Q', 'J', '10'])
             >>> card.delete_some_values(['A', '10'])
-            [True, True]
+            True
             >>> card.get_values_with_flags()
             [\
 {'value': 'K', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
 {'value': 'Q', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
 {'value': 'J', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}]
             >>> card.delete_some_values(['7', '8', '9'])
-            [False, False, False]
+            Traceback (most recent call last):
+            ...
+            Exception: Error! No '7' value in card.
         """
-        result = []
+
         for value in values:
-            if self.delete_one_value(value):
-                result.append(True)
-            else:
-                result.append(False)
-        return result
+            self.delete_one_value(value)
+        return True
 
     def exchange_value(self, old_value: str, new_value: str) -> bool:
         """
@@ -252,18 +294,40 @@ class Card:
 
         Returns:
             bool: True, если старое значение было найдено и успешно заменено, False в противном случае.
+            Иначе - выбрасывает собственное иключение.
 
         Examples:
             >>> card = Card("Test Card", ["Value 1", "Value 2", "Value 3"])
+            >>> card.exchange_value("", "Value4")
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! Empty old value.
+            >>> card.exchange_value("Value 1", "")
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! Empty new value.
+            >>> card.exchange_value("Value 5","Value 6")
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! No 'Value 5' value in the card.
+            >>> card.exchange_value("Value 3", "Value 3")
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! New value repeats the old value.
             >>> card.exchange_value("Value 2", "Value 4")
             True
-            >>> "Value 2" not in [value['value'] for value in card.values]
-            True
-            >>> "Value 4" in [value['value'] for value in card.values]
-            True
         """
+        if old_value == '':
+            raise ValueError('Error! Empty old value.')
+
+        elif new_value == '':
+            raise ValueError('Error! Empty new value.')
+
+        elif old_value == new_value:
+            raise ValueError('Error! New value repeats the old value.')
+
         for i, value in enumerate(self.values):
             if value['value'] == old_value:
                 self.values[i] = {'value': new_value, 'flags': value['flags']}
                 return True
-        return False
+        raise ValueError(f'Error! No \'{old_value}\' value in the card.')
