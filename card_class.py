@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 
 class Card:
@@ -7,6 +7,7 @@ class Card:
     def __init__(self, name: str, values: List[str]):
         """
         Создает новую карточку, предварительно заранее проверив корректность входных знаений
+        (ГДЕ ПРОВЕРКА???)
 
         Args:
             name: Имя карточки.
@@ -26,23 +27,70 @@ class Card:
             # Добавляем словарь в список значений
             self.values.append({'value': value, 'flags': value_flags})
 
-    def get_values(self) -> List[str]:
-        """
-        Возвращает список значений, содержащихся в данной карте.
+        # убеждаемся в корректности карты
+        # if False in self.check_some_values(self.get_values_without_flags()):
+        #     False
 
-        Возвращает:
-            List[str]: Список строковых значений, содержащихся в карте.
+    def get_values_with_flags(self) -> list[dict[str, dict[str, None | bool] | str]]:
+        """
+        Возвращает список значений, содержащихся в данной карте, включая флаги для каждого значения.
+
+        Returns:
+            Список значений с флагами.
+
+        # ПЕРЕПИСАТЬ ПРИМЕРЫ ДЛЯ flag[...] is not None!!!
+        Examples:
+            >>> card = Card("Card 1", ["Value 1", "Value 2"])
+            >>> card.get_values_with_flags()
+            [{'value': 'Value 1', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
+{'value': 'Value 2', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}]
+        """
+        return self.values
+
+    def get_values_without_flags(self) -> List[str]:
+        """
+        Возвращает список значений, содержащихся в данной карте, НЕ включая флаги для каждого значения.
+
+        Returns:
+            Список значений без флагов.
+
+        >>> card = Card("Test Card", ['Value 1', 'Value 2'])
+        >>> card.get_values_without_flags()
+        ['Value 1', 'Value 2']
+
+        >>> card2 = Card("Test Card 2", ['Value 3', 'Value 4'])
+        >>> card2.get_values_without_flags()
+        ['Value 3', 'Value 4']
+
+        >>> card3 = Card("Test Card 3", [])
+        >>> card3.get_values_without_flags()
+        []
         """
         return [value['value'] for value in self.values]
 
     def check_one_value(self, value: str) -> bool:
         """Проверяет, может ли данное значение value быть использовано для создания карты.
+
         Args:
             value: строка, значение, которое нужно проверить.
 
         Returns:
+            Если значение value пустое, то возвращает False.
             Если значение value уже есть в карте или входит в имя карты, то возвращает False.
             Если же данное значение может быть использовано для создания карты, возвращает True.
+
+        Examples:
+            >>> card = Card("Test Card", ["Value 1", "Value 2"])
+            >>> card.check_one_value("Value 1")
+            False
+            >>> card.check_one_value("Value 2")
+            False
+            >>> card.check_one_value("Value 3")
+            True
+            >>> card.check_one_value("Test")
+            False
+            >>> card.check_one_value("")
+            False
         """
 
         # Проверяем, если значение пустое, то оно не может быть использовано.
@@ -65,11 +113,21 @@ class Card:
         """
         Проверяет, являются ли все значения из списка допустимыми для данной карты.
 
-        Параметры:
+        Args:
             values (List[str]): список значений, которые необходимо проверить.
 
-        Возвращает:
-            List[bool]: список значений True и False для каждого добавляемого значения в порядке их следования в параметрах.
+        Returns:
+            List[bool]: список значений True и False для каждого добавляемого значения
+            в порядке их следования в параметрах.
+
+        Examples:
+            >>> card = Card('name1', ['A', 'K', 'Q', 'J', '10'])
+            >>> card.check_some_values(['A', '10'])
+            [False, False]
+            >>> card.check_some_values(['K', '9'])
+            [False, True]
+            >>> card.check_some_values(['7', '8', '9'])
+            [True, True, True]
         """
         return [self.check_one_value(value) for value in values]
 
@@ -107,6 +165,21 @@ class Card:
 
         Returns:
             Список из значений True и False для каждого добавляемого значения в порядке их следования в параметрах.
+
+        Examples:
+            >>> card = Card('name1', ['A', 'K', 'Q', 'J', '10'])
+            >>> card.add_some_values(['A', 'K', 'Q'])
+            [False, False, False]
+            >>> card.add_some_values(['J', '10', '9'])
+            [False, False, True]
+            >>> card.get_values_with_flags()
+            [\
+{'value': 'A', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
+{'value': 'K', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
+{'value': 'Q', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
+{'value': 'J', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
+{'value': '10', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
+{'value': '9', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}]
         """
         results = []
         for value in values:
@@ -125,6 +198,13 @@ class Card:
 
         Returns:
             bool: True, если значение было успешно удалено, False в противном случае.
+
+        Examples:
+            >>> card = Card("Test Card", ["Value 1", "Value 2", "Value 3"])
+            >>> card.delete_one_value("Value 2")
+            True
+            >>> "Value 2" in [value['value'] for value in card.values]
+            False
         """
         for item in self.values:
             if item['value'] == value:
@@ -141,6 +221,18 @@ class Card:
 
         Returns:
             Список значений True и False для каждого значения в порядке их следования в параметрах.
+
+        Examples:
+            >>> card = Card('name1', ['A', 'K', 'Q', 'J', '10'])
+            >>> card.delete_some_values(['A', '10'])
+            [True, True]
+            >>> card.get_values_with_flags()
+            [\
+{'value': 'K', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
+{'value': 'Q', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
+{'value': 'J', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}]
+            >>> card.delete_some_values(['7', '8', '9'])
+            [False, False, False]
         """
         result = []
         for value in values:
@@ -160,6 +252,15 @@ class Card:
 
         Returns:
             bool: True, если старое значение было найдено и успешно заменено, False в противном случае.
+
+        Examples:
+            >>> card = Card("Test Card", ["Value 1", "Value 2", "Value 3"])
+            >>> card.exchange_value("Value 2", "Value 4")
+            True
+            >>> "Value 2" not in [value['value'] for value in card.values]
+            True
+            >>> "Value 4" in [value['value'] for value in card.values]
+            True
         """
         for i, value in enumerate(self.values):
             if value['value'] == old_value:
