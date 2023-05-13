@@ -7,14 +7,31 @@ class Card:
     def __init__(self, name: str, values: List[str]):
         """
         Создает новую карточку, предварительно заранее проверив корректность входных значений
-        (ПОЧИНИТЬ ПРОВЕРКУ!!!)
 
         Args:
             name: Имя карточки.
             values: Значения карточки. По умолчанию все значения флагов == None
+
+        Examples:
+            >>> Card("Card 1", ["Value 1", ""])
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! Empty value.
+            >>> Card("Card 1", ["Value 1", "Value 1"])
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The value 'Value 1' repeats.
+            >>> Card("Card 1", ["Value 1", "Card"])
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The name 'Card 1' shouldn't contain the value 'Card'.
         """
         self.name = name
         self.values = []
+
+        # убеждаемся в корректности карты
+        self.check_some_values(values)
+
         # Итерируемся по каждому значению в списке значений
         for value in values:
             # Создаем словарь с флагами для каждого значения
@@ -26,9 +43,6 @@ class Card:
             }
             # Добавляем словарь в список значений
             self.values.append({'value': value, 'flags': value_flags})
-
-        # убеждаемся в корректности карты
-        # self.check_some_values(self.get_values_without_flags())
 
     def get_values_with_flags(self) -> list[dict[str, dict[str, None | bool] | str]]:
         """
@@ -87,7 +101,7 @@ class Card:
             >>> card.check_one_value("Test")
             Traceback (most recent call last):
             ...
-            ValueError: Error! The name 'Test Card' shouldn't contain the value Test.
+            ValueError: Error! The name 'Test Card' shouldn't contain the value 'Test'.
             >>> card.check_one_value("")
             Traceback (most recent call last):
             ...
@@ -105,7 +119,7 @@ class Card:
 
         # Проверяем, если значение входит в имя карты, то оно не может быть использовано.
         if value in self.name:
-            raise ValueError(f'Error! The name \'{self.name}\' shouldn\'t contain the value {value}.')
+            raise ValueError(f'Error! The name \'{self.name}\' shouldn\'t contain the value \'{value}\'.')
 
         # Если значение не повторяется в списке значений карты и не входит в имя карты, то оно может быть использовано.
         return True
@@ -122,18 +136,25 @@ class Card:
             Иначе - выбрасывает иключение из check_one_value()
 
         Examples:
-            >>> card = Card('name1', ['A', 'K', 'Q', 'J', '10'])
+            >>> card = Card('Card 1', ['A', 'K', 'Q', 'J', '10'])
+            >>> card.check_some_values(['I','I'])
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The value 'I' repeats.
             >>> card.check_some_values(['A', '10'])
             Traceback (most recent call last):
             ...
-            ValueError: Error! The value A is already in card.
+            ValueError: Error! The value 'A' is already in card.
             >>> card.check_some_values(['K', '9'])
             Traceback (most recent call last):
             ...
-            ValueError: Error! The value K is already in card.
+            ValueError: Error! The value 'K' is already in card.
             >>> card.check_some_values(['7', '8', '9'])
             True
         """
+        for val in values:
+            if values.count(val) > 1:
+                raise ValueError(f'Error! The value \'{val}\' repeats.')
         for value in values:
             self.check_one_value(value)
         return True
