@@ -22,9 +22,9 @@ v - delete_some_values
 v - exchange_value
 ----------------
 
-~ - CardManager 0.1:
-~ - Протестировать!!!
-x - Перенести тесты из Юниттестов в Доктесты
+V - CardManager 0.1:
+v - Протестировать!!!
+v - Перенести тесты из Юниттестов в Доктесты
 
 v - check_one_card
 v - check_some_cards

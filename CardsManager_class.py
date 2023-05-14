@@ -12,32 +12,71 @@ class CardsManager:
     def check_one_card(self, card: Card) -> bool:
         """
         Проверяет, можно ли добавить данную карту в CardManager.
+        Более подробные условия смотри ниже в реализации функции.
 
         Args:
             card: Карта, которую нужно проверить.
 
         Returns:
-            True, если карту можно добавить, иначе False.
-        """
-        # Проверяем, что значения карты корректны
-        if not card.check_some_values(card.values):
-            return False
+            Исключение  еще до запуска данной функции check_one_card(), если  сама добавляемая карта некорректна
+            (см. класс Card).
+            Исключение, если  значение добавляемой карты уже есть в существующих картах.
+            Исключение, если  имя добавляемой карты уже есть в существующих картах.
+            True иначе.
+
+        Examples:
+            >>> manager = CardsManager()
+            >>> Card("Card 1", ["Value 1", ""])
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! Empty value.
+            >>> Card("Card 1", ["Value 1", "Value 1"])
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The value 'Value 1' repeats.
+            >>> Card("Card 1", ["Value 1", "Card"])
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The name 'Card 1' shouldn't contain the value 'Card'.
+            >>> card1 = Card("Card 1", ["Value 1", "Value 2"])
+            >>> card2 = Card("Card 2", ["Value 3", "Value 2"])
+            >>> manager.add_one_card(card1)
+            True
+            >>> manager.check_one_card(card2)
+            Traceback (most recent call last):
+            ...
+            \
+ValueError: Error! The card {'name': 'Card 1', 'values': ['Value 1', 'Value 2']} \
+already consists the value 'Value 2'.
+            >>> card3 = Card("Card 1", ["Value 4", "Value 5"])
+            >>> manager.check_one_card(card3)
+            Traceback (most recent call last):
+            ...
+            \
+ValueError: Error! The card {'name': 'Card 1', 'values': ['Value 1', 'Value 2']} \
+already consists the name 'Card 1'.
+            >>> card4 = Card("Card 3", ["Value 4"])
+            >>> manager.check_one_card(card4)
+            True
+            """
 
         # Проверяем, что все значения уникальны для всех карт, имеющихся в CardsManager
-        all_values = set()
-        for other_card in self.cards:
-            all_values.update(other_card.values)
-        if any(val in all_values for val in card.values):
-            return False
+        for value in card.get_values_without_flags():
+            for existing_card in self.cards:
+                for existing_value in existing_card.get_values_without_flags():
+                    if value == existing_value:
+                        raise ValueError(
+                            f"Error! The card {existing_card.get_card()} already consists the value \'{value}\'.")
 
         # Проверяем, что имя карты уникально для всех карт из CardsManager
-        if any(c.name == card.name for c in self.cards):
-            return False
+        for existing_card in self.cards:
+            if card.name == existing_card.name:
+                raise ValueError(f"Error! The card {existing_card.get_card()} already consists the name \'{card.name}\'.")
 
         # Если все проверки пройдены, возвращаем True
         return True
 
-    def check_some_cards(self, cards: List[Card]) -> List[bool]:
+    def check_some_cards(self, cards: List[Card]) -> bool:
         """
         Проверяет, можно ли добавить список карт в CardManager.
 
@@ -45,27 +84,73 @@ class CardsManager:
             cards: Список карт, которые нужно проверить.
 
         Returns:
-            Список булевых значений, где True соответствует тому, что карта может быть добавлена в CardManager,
-            а False - что карта не может быть добавлена в CardManager.
+            Исключение из check_one_card(), если хотя бы одно значение не может быть добавлено.
+            True, если все карты могут быть добавлены.
+
+        Examples:
+            >>> manager = CardsManager()
+            >>> card1 = Card("Card 1", ["Value 1", "Value 2"])
+            >>> card2 = Card("Card 2", ["Value 3", "Value 4"])
+            >>> card3 = Card("Card 3", ["Value 5", "Value 2"])
+            >>> card4 = Card("Card 1", ["Value 6", "Value 7"])
+            >>> manager.add_one_card(card1)
+            True
+            >>> manager.check_some_cards([card2])
+            True
+            >>> manager.check_some_cards([card2, card3])
+            Traceback (most recent call last):
+            ...
+            \
+ValueError: Error! The card {'name': 'Card 1', 'values': ['Value 1', 'Value 2']} \
+already consists the value 'Value 2'.
+            >>> manager.check_some_cards([card4])
+            Traceback (most recent call last):
+            ...
+            \
+ValueError: Error! The card {'name': 'Card 1', 'values': ['Value 1', 'Value 2']} \
+already consists the name 'Card 1'.
         """
-        return [self.check_one_card(card) for card in cards]
+        for card in cards:
+            self.check_one_card(card)
+        return True
 
     def add_one_card(self, card: Card) -> bool:
         """
-        Добавляет карту в CardsManager, если она проходит проверку.
+        Добавляет карту в CardsManager, если она проходит проверку на корректность.
 
         Args:
             card: Карта, которую нужно добавить.
 
         Returns:
-            True, если карта была успешно добавлена, иначе False.
-        """
-        if self.check_one_card(card):
-            self.cards.append(card)
-            return True
-        return False
+            Исключение из check_one_card(), если карта не может быть добавлена.
+            True иначе.
 
-    def add_some_cards(self, cards: List[Card]) -> List[bool]:
+        Examples:
+            >>> manager = CardsManager()
+            >>> card1 = Card("Card 1", ["Value 1", "Value 2"])
+            >>> card2 = Card("Card 2", ["Value 3", "Value 4"])
+            >>> card3 = Card("Card 3", ["Value 5", "Value 2"])
+            >>> card4 = Card("Card 1", ["Value 6", "Value 7"])
+            >>> manager.add_one_card(card1)
+            True
+            >>> manager.add_one_card(card3)
+            Traceback (most recent call last):
+            ...
+            \
+ValueError: Error! The card {'name': 'Card 1', 'values': ['Value 1', 'Value 2']} \
+already consists the value 'Value 2'.
+            >>> manager.add_one_card(card4)
+            Traceback (most recent call last):
+            ...
+            \
+ValueError: Error! The card {'name': 'Card 1', 'values': ['Value 1', 'Value 2']} \
+already consists the name 'Card 1'.
+        """
+        self.check_one_card(card)
+        self.cards.append(card)
+        return True
+
+    def add_some_cards(self, cards: List[Card]) -> bool:
         """
         Добавляет список карт в CardsManager, используя метод add_one_card.
 
@@ -73,32 +158,64 @@ class CardsManager:
             cards: Список карт, которые нужно добавить.
 
         Returns:
-            Список булевых значений, где True соответствует успешно добавленной карте, а False - некорректной карте.
+            Исключение из check_one_card(), если карта не может быть доабвалена
+            True иначе.
+
+        Examples:
+            >>> manager = CardsManager()
+            >>> card1 = Card("Card 1", ["Value 1", "Value 2"])
+            >>> card2 = Card("Card 2", ["Value 3", "Value 4"])
+            >>> card3 = Card("Card 3", ["Value 5", "Value 2"])
+            >>> card4 = Card("Card 1", ["Value 6", "Value 7"])
+            >>> manager.add_one_card(card1)
+            True
+            >>> manager.add_some_cards([card2, card3])
+            Traceback (most recent call last):
+            ...
+            \
+ValueError: Error! The card {'name': 'Card 1', 'values': ['Value 1', 'Value 2']} \
+already consists the value 'Value 2'.
+            >>> manager.add_some_cards([card4])
+            Traceback (most recent call last):
+            ...
+            \
+ValueError: Error! The card {'name': 'Card 1', 'values': ['Value 1', 'Value 2']} \
+already consists the name 'Card 1'.
         """
         results = []
         for card in cards:
-            if self.add_one_card(card):
-                results.append(True)
-            else:
-                results.append(False)
-        return results
+            self.add_one_card(card)
+        return True
 
     def find_card_by_name(self, name: str) -> Card | None:
         """
-        Ищет карту в CardsManager по имени.
+        Ищет карту в CardsManager по имени, если таковая есть.
 
         Args:
             name: имя карты, которую нужно найти.
 
         Returns:
-            Объект Card, если карта найдена, иначе None.
+            Собственное исключение, если карта не найдена.
+            Объект Card иначе.
+
+        Examples:
+            >>> manager = CardsManager()
+            >>> card1 = Card('Card 1', ['Value 1'])
+            >>> manager.add_one_card(card1)
+            True
+            >>> manager.find_card_by_name('Card 2')
+            Traceback (most recent call last):
+            ...
+            NameError: Error! No card with name 'Card 2'.
+            >>> manager.find_card_by_name('Card 1').get_card()
+            {'name': 'Card 1', 'values': ['Value 1']}
         """
         for card in self.cards:
             if card.name == name:
                 return card
-        return None
+        raise NameError(f'Error! No card with name \'{name}\'.')
 
-    def find_card_by_value(self, value: str) -> Card | None:
+    def find_card_by_value(self, value: str) -> Card:
         """
         Ищет карту по ее значению.
 
@@ -106,94 +223,88 @@ class CardsManager:
             value: значение, по которому нужно найти карту.
 
         Returns:
-            Объект карты типа Card, если карта найдена, иначе None.
+            Собственное исклеючение, если карта не найдена.
+            Объект карты типа Card иначе.
+
+        Examples:
+            >>> manager = CardsManager()
+            >>> card1 = Card('Card 1', ['Value 1'])
+            >>> manager.add_one_card(card1)
+            True
+            >>> manager.find_card_by_value('Value 2')
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! No card with value 'Value 2'.
+            >>> manager.find_card_by_value('Value 1').get_card()
+            {'name': 'Card 1', 'values': ['Value 1']}
         """
         for card in self.cards:
-            if card.value == value:
-                return card
-        return None
+            for existing_value in card.get_values_without_flags():
+                if existing_value == value:
+                    return card
+        raise ValueError(f'Error! No card with value \'{value}\'.')
 
     def remove_card_by_name(self, name: str) -> Card | None:
-        """Удаляет карту из списка по ее имени.
+        """Удаляет карту из списка по ее имени, если таковая имеется.
 
         Args:
             name: строка, имя карты, которую нужно удалить.
 
         Returns:
-            Объект типа Card, если карта была найдена и удалена, иначе None.
+            Исключение из find_card_by_name(), если карта не найдена.
+            Объект типа Card (удаленнноя карта) иначе.
+
+        Examples:
+            >>> manager = CardsManager()
+            >>> card1 = Card('Card 1', ['Value 1'])
+            >>> manager.add_one_card(card1)
+            True
+            >>> manager.remove_card_by_name('Card 2')
+            Traceback (most recent call last):
+            ...
+            NameError: Error! No card with name 'Card 2'.
+            >>> manager.remove_card_by_name('Card 1').get_card()
+            {'name': 'Card 1', 'values': ['Value 1']}
+            >>> len(manager.cards)
+            0
         """
+        # Проверяем, что карта с таким именем есть.
+        self.find_card_by_name(name)
+
         # Проходим по всем картам в списке.
         for i, card in enumerate(self.cards):
             # Если имя карты соответствует заданному имени, то удаляем карту из списка и возвращаем ее объект.
             if card.name == name:
                 return self.cards.pop(i)
-        # Если карта не найдена, то возвращаем None.
-        return None
 
-    def remove_card_by_value(self, value: str) -> Card | None:
+    def remove_card_by_value(self, value: str) -> Card:
         """
-        Удаляет первую найденную карту с заданным значением value.
+        Удаляет первую найденную карту с заданным значением value, если таковая есть.
 
         Args:
             value: Значение карты, которую нужно удалить.
 
         Returns:
-            Удаленный объект Card, если карта найдена и удалена успешно, иначе None.
+            Исключение из find_card_by_value(), если карта не найдена.
+            Удаленный объект Card иначе.
+
+        Examples:
+            >>> manager = CardsManager()
+            >>> card1 = Card('Card 1', ['Value 1'])
+            >>> manager.add_one_card(card1)
+            True
+            >>> manager.remove_card_by_value('Value 2')
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! No card with value 'Value 2'.
+            >>> manager.remove_card_by_value('Value 1').get_card()
+            {'name': 'Card 1', 'values': ['Value 1']}
         """
+        # Проверяем, что карта с таким значением есть.
+        self.find_card_by_value(value)
+
         for i, card in enumerate(self.cards):
-            if card.value == value:
-                # Если найдена карта с заданным значением, удаляем ее из списка карт и возвращаем ее
-                return self.cards.pop(i)
-        # Если карта не найдена, возвращаем None
-        return None
-
-
-def test_check_one_card():
-    manager = CardsManager()
-
-    # Добавляем первую карту, она должна пройти проверку
-    card1 = Card("card1", ["value1", "value2"])
-    assert manager.check_one_card(card1) == True
-
-    # Добавляем вторую карту, ее значение уже есть в первой карте, проверка должна вернуть False
-    card2 = Card("card2", ["value2", "value3"])
-    assert manager.check_one_card(card2) == False
-
-    # Добавляем третью карту, ее имя уже есть в первой карте, проверка должна вернуть False
-    card3 = Card("card1", ["value4", "value5"])
-    assert manager.check_one_card(card3) == False
-
-
-def test_check_some_cards():
-    manager = CardsManager()
-
-    # Создаем список из двух карт, обе должны пройти проверку
-    cards1 = [Card("card1", ["value1", "value2"]), Card("card2", ["value3", "value4"])]
-    assert manager.check_some_cards(cards1) == [True, True]
-
-    # Создаем список из двух карт, первая карта уже есть в менеджере, вторая карта проходит проверку
-    cards2 = [Card("card1", ["value1", "value2"]), Card("card3", ["value5", "value6"])]
-    assert manager.check_some_cards(cards2) == [False, True]
-
-    # Создаем список из двух карт, обе карты уже есть в менеджере, проверка должна вернуть False для обоих карт
-    cards3 = [Card("card1", ["value1", "value2"]), Card("card2", ["value3", "value4"])]
-    assert manager.check_some_cards(cards3) == [False, False]
-
-
-def test_add_one_card():
-    manager = CardsManager()
-
-    # Добавляем первую карту, она должна успешно добавиться
-    card1 = Card("card1", ["value1", "value2"])
-    assert manager.add_one_card(card1) == True
-
-    # Добавляем вторую карту, ее значение уже есть в первой карте, добавление должно провалиться
-    card2 = Card("card2", ["value2", "value3"])
-    assert manager.add_one_card(card2) == False
-
-    # Добавляем третью карту, ее имя уже есть в первой карте, добавление должно провалиться
-    card3 = Card("card1", ["value4", "value5"])
-    assert manager.add_one_card(card3) == False
-
-
-
+            for existing_value in card.get_values_without_flags():
+                if existing_value == value:
+                    # Если найдена карта с заданным значением, удаляем ее из списка карт и возвращаем ее
+                    return self.cards.pop(i)

@@ -91,7 +91,7 @@ class Card:
         """
         return {'name': self.name, 'values': self.get_values_without_flags()}
 
-    def check_one_value(self, value: str) -> bool | None:  # нужен ли здесь None?
+    def check_one_value(self, value: str) -> bool:
         """
         Проверяет, может ли данное значение value быть использовано для создания карты.
         Более подробные условия смотри ниже в реализации функции.
@@ -138,7 +138,7 @@ class Card:
         # Если значение не повторяется в списке значений карты и не входит в имя карты, то оно может быть использовано.
         return True
 
-    def check_some_values(self, values: List[str]) -> bool | None:  # нужен ли здесь None?
+    def check_some_values(self, values: List[str]) -> bool:
         """
         Проверяет, являются ли все значения из списка допустимыми для данной карты.
 
@@ -173,7 +173,7 @@ class Card:
             self.check_one_value(value)
         return True
 
-    def add_one_value(self, value: str) -> bool | None:  # нужен ли здесь None?
+    def add_one_value(self, value: str) -> bool:
         """
         Добавляет одно значение в карту, если оно может быть добавлено.
         Кидает исключение, если значеие не может быть добавлено.
@@ -194,7 +194,7 @@ class Card:
             >>> card.add_one_value("Test")
             Traceback (most recent call last):
             ...
-            ValueError: Error! The name 'Test Card' shouldn\'t contain the value Test.
+            ValueError: Error! The name 'Test Card' shouldn\'t contain the value 'Test'.
             >>> card.add_one_value("")
             Traceback (most recent call last):
             ...
@@ -218,7 +218,7 @@ class Card:
         #    # Значение не может быть добавлено в карту.
         #    return False
 
-    def add_some_values(self, values: List[str]) -> bool | None:  # нужен ли здесь None?
+    def add_some_values(self, values: List[str]) -> bool:
         """
         Добавляет список значений в список значений карты, проверяя каждое значение на корректность.
         Если значение некорректно, кидается исключение, и это значние не добавляется.
@@ -255,7 +255,7 @@ class Card:
             self.add_one_value(value)
         return True
 
-    def delete_one_value(self, value: str) -> bool | None:  # нужен ли здесь None?
+    def delete_one_value(self, value: str) -> bool:
         """
         Удаляет значение из списка значений карты.
 
@@ -288,7 +288,7 @@ class Card:
                 return True
         raise Exception(f'Error! No \'{value}\' value in card.')  # какого типа лучше бросить исключение?
 
-    def delete_some_values(self, values: List[str]) -> bool | None:  # нужен ли здесь None?
+    def delete_some_values(self, values: List[str]) -> bool:
         """
         Удаляет список значений из карты, если они могут быть удалены.
         В противном случае кидает исключение.
@@ -302,17 +302,19 @@ class Card:
 
         Examples:
             >>> card = Card('name1', ['A', 'K', 'Q', 'J', '10'])
-            >>> card.delete_some_values(['A', '10'])
-            True
             >>> card.get_values_with_flags()
             [\
+{'value': 'A', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
 {'value': 'K', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
 {'value': 'Q', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
-{'value': 'J', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}]
+{'value': 'J', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
+{'value': '10', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}]
             >>> card.delete_some_values(['7', '8', '9'])
             Traceback (most recent call last):
             ...
             Exception: Error! No '7' value in card.
+            >>> card.delete_some_values(['A', '10'])
+            True
         """
 
         for value in values:
