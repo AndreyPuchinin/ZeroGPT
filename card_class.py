@@ -77,6 +77,20 @@ class Card:
         """
         return [value['value'] for value in self.values]
 
+    def get_card(self):
+        """
+        Возвращает словарь с именем карточки и значениями карточки.
+
+        Returns:
+            Словарь с именем и значениями карточки.
+
+        Examples:
+            >>> card1 = Card('Card 1', ['Value 1', 'Value 2'])
+            >>> card1.get_card()
+            {'name': 'Card 1', 'values': ['Value 1', 'Value 2']}
+        """
+        return {'name': self.name, 'values': self.get_values_without_flags()}
+
     def check_one_value(self, value: str) -> bool | None:  # нужен ли здесь None?
         """
         Проверяет, может ли данное значение value быть использовано для создания карты.
