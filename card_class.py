@@ -44,6 +44,27 @@ class Card:
             # Добавляем словарь в список значений
             self.values.append({'value': value, 'flags': value_flags})
 
+    def is_selfref_val(self, value):
+        """
+        Проверяет, является ли значение самоссылкой
+
+        Args:
+            value: значение, которое надо проверить
+
+        :return:
+            True, если значение - самоссылка
+            False иначе
+
+        Examples:
+            >>>card = Card("<num>", ["<num><num>", "<num>"])
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The name '<num>' shouldn't contain the value '<num>'.
+        """
+        if self.name in value:
+            return True
+        return False
+
     def get_values_with_flags(self) -> list[dict[str, dict[str, None | bool] | str]]:
         """
         Возвращает список значений, содержащихся в данной карте, включая флаги для каждого значения.
@@ -116,6 +137,10 @@ class Card:
             Traceback (most recent call last):
             ...
             ValueError: Error! The name 'Test Card' shouldn't contain the value 'Test'.
+            >>> card.check_one_value("Test Card")
+            Traceback (most recent call last):
+            ...
+            ValueError: Error! The name 'Test Card' shouldn't contain the value 'Test Card'.
             >>> card.check_one_value("")
             Traceback (most recent call last):
             ...
@@ -368,3 +393,8 @@ class Card:
                 self.values[i] = {'value': new_value, 'flags': value['flags']}
                 return True
         raise ValueError(f'Error! No \'{old_value}\' value in the card.')
+
+
+# if __name__ == '__main__':
+    # card = Card("Test Card", ["Value 1"])
+    # print(card.check_one_value("Test Card"))
