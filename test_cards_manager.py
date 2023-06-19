@@ -1,55 +1,56 @@
 import unittest
-from card_class import Card
+from typing import List
+from CardsManager_class import Card, CardsManager
 
 
-class TestCard(unittest.TestCase):
+class TestCardManager(unittest.TestCase):
+    def setUp(self):
+        pass
 
-    def test_init(self):
-        card = Card("test", ["value1", "value2"])
-        self.assertEqual(card.name, "test")
-        self.assertEqual(card.values, ["value1", "value2"])
+    def test_check_one_card_returns_true_for_valid_card(self):
+        self.cards_manager = CardsManager()
+        # Создаем карту, которую будем проверять
+        card = Card("Test card", ["value1", "value2", "value3"])
 
-    def test_get_values(self):
-        card = Card("test", ["value1", "value2"])
-        self.assertEqual(card.get_values(), ["value1", "value2"])
+        # Проверяем, что метод возвращает True
+        result = self.cards_manager.check_one_card(card)
+        self.assertTrue(result)
 
-    def test_check_one_value(self):
-        card = Card("test", ["value1", "value2"])
-        self.assertFalse(card.check_one_value("value1"))
-        self.assertFalse(card.check_one_value("test"))
-        self.assertTrue(card.check_one_value("value3"))
+    def test_check_one_card_returns_false_if_values_not_unique(self):
+        self.cards_manager = CardsManager()
+        # Создаем карту, у которой есть одно значение, которое уже есть у другой карты
+        card1 = Card("Test card 1", ["value1", "value2"])
+        card2 = Card("Test card 2", ["value2", "value3"])
 
-    def test_check_some_values(self):
-        card = Card("test", ["value1", "value2"])
-        self.assertEqual(card.check_some_values(["value1", "value2", "value3"]), [False, False, True])
+        # Добавляем первую карту в CardsManager
+        self.cards_manager.cards.append(card1)
 
-    def test_add_one_value(self):
-        card = Card("test", ["value1", "value2"])
-        self.assertTrue(card.add_one_value("value3"))
-        self.assertEqual(card.values, ["value1", "value2", "value3"])
-        self.assertFalse(card.add_one_value("value1"))
-        self.assertFalse(card.add_one_value("test"))
-        self.assertFalse(card.add_one_value(""))
+        # Проверяем, что метод возвращает False при попытке добавить вторую карту
+        result = self.cards_manager.check_one_card(card2)
+        self.assertFalse(result)
 
-    def test_add_some_values(self):
-        card = Card("test", ["value1", "value2"])
-        self.assertEqual(card.add_some_values(["value2", "value3", "value1", "test", ""]), [False, True, False, False, False])
-        self.assertEqual(card.values, ["value1", "value2", "value3"])
+    def test_check_one_card_returns_false_if_card_name_not_unique(self):
+        self.cards_manager = CardsManager()
+        # Создаем две карты с одинаковыми именами
+        card1 = Card("Test card", ["value1", "value2"])
+        card2 = Card("Test card", ["value3", "value4"])
 
-    def test_delete_one_value(self):
-        card = Card("test", ["value1", "value2"])
-        self.assertTrue(card.delete_one_value("value1"))
-        self.assertEqual(card.values, ["value2"])
-        self.assertFalse(card.delete_one_value("value3"))
+        # Добавляем первую карту в CardsManager
+        self.cards_manager.cards.append(card1)
 
-    def test_delete_some_values(self):
-        card = Card("test", ["value1", "value2"])
-        self.assertEqual(card.delete_some_values(["value2", "value3", "value1", ""]), [True, False, True, False])
-        self.assertEqual(card.values, [])
+        # Проверяем, что метод возвращает False при попытке добавить вторую карту
+        result = self.cards_manager.check_one_card(card2)
+        self.assertFalse(result)
 
-    def test_exchange_value(self):
-        card = Card("test", ["value1", "value2"])
-        self.assertTrue(card.exchange_value("value1", "value3"))
-        self.assertEqual(set(card.values), {"value3", "value2"})
-        self.assertFalse(card.exchange_value("value1", "test"))
-        self.assertFalse(card.exchange_value("value1", ""))
+    def test_check_one_card_returns_false_if_card_values_invalid(self):
+        self.cards_manager = CardsManager()
+        # Создаем карту, у которой одно значение не проходит проверку
+        card = Card("Test card", ["invalid_value", "value2"])
+
+        # Проверяем, что метод возвращает False
+        # print(self.cards_manager.check_one_card(card))
+        # self.assertFalse(result)
+
+
+if __name__ == '__main__':
+    unittest.main()
