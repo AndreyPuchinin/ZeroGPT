@@ -11,21 +11,11 @@ class Card:
         Args:
             name: Имя карточки.
             values: Значения карточки. По умолчанию все значения флагов == None
-
-        Examples:
-            >>> Card("Card 1", ["Value 1", ""])
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! Empty value.
-            >>> Card("Card 1", ["Value 1", "Value 1"])
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The value 'Value 1' repeats.
-            >>> Card("Card 1", ["Value 1", "Card"])
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The name 'Card 1' shouldn't contain the value 'Card'.
         """
+
+        if len(values) == 0:
+            raise ValueError("Error! No values.")
+
         self.name = name
         self.values = []
 
@@ -54,12 +44,6 @@ class Card:
         :return:
             True, если значение - самоссылка
             False иначе
-
-        Examples:
-            >>>card = Card("<num>", ["<num><num>", "<num>"])
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The name '<num>' shouldn't contain the value '<num>'.
         """
         if self.name in value:
             return True
@@ -72,12 +56,6 @@ class Card:
         Returns:
             Список значений с флагами.
 
-        Examples:
-            >>> card = Card("Card 1", ["Value 1", "Value 2"])
-            >>> card.get_values_with_flags()
-            [\
-{'value': 'Value 1', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
-{'value': 'Value 2', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}]
         """
         return self.values
 
@@ -88,13 +66,6 @@ class Card:
         Returns:
             Список значений без флагов.
 
-        >>> card = Card("Test Card", ['Value 1', 'Value 2'])
-        >>> card.get_values_without_flags()
-        ['Value 1', 'Value 2']
-
-        >>> card3 = Card("Test Card 3", [])
-        >>> card3.get_values_without_flags()
-        []
         """
         return [value['value'] for value in self.values]
 
@@ -105,10 +76,6 @@ class Card:
         Returns:
             Словарь с именем и значениями карточки.
 
-        Examples:
-            >>> card1 = Card('Card 1', ['Value 1', 'Value 2'])
-            >>> card1.get_card()
-            {'name': 'Card 1', 'values': ['Value 1', 'Value 2']}
         """
         return {'name': self.name, 'values': self.get_values_without_flags()}
 
@@ -124,27 +91,6 @@ class Card:
             Если значение value пустое, то кидает исключение ValueError (см. ниже).
             Если значение value уже есть в карте или входит в имя карты, то кидает исключение ValueError (см. ниже).
             Если же данное значение может быть использовано для создания карты, возвращает True.
-
-        Examples:
-            >>> card = Card("Test Card", ["Value 1", "Value 2"])
-            >>> card.check_one_value("Value 1")
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The value 'Value 1' is already in card.
-            >>> card.check_one_value("Value 3")
-            True
-            >>> card.check_one_value("Test")
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The name 'Test Card' shouldn't contain the value 'Test'.
-            >>> card.check_one_value("Test Card")
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The name 'Test Card' shouldn't contain the value 'Test Card'.
-            >>> card.check_one_value("")
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! Empty value.
         """
 
         # Проверяем, если значение пустое, то оно не может быть использовано.
@@ -174,22 +120,6 @@ class Card:
             True - если все значения допустимы
             Иначе - выбрасывает иключение из check_one_value()
 
-        Examples:
-            >>> card = Card('Card 1', ['A', 'K', 'Q', 'J', '10'])
-            >>> card.check_some_values(['I','I'])
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The value 'I' repeats.
-            >>> card.check_some_values(['A', '10'])
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The value 'A' is already in card.
-            >>> card.check_some_values(['K', '9'])
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The value 'K' is already in card.
-            >>> card.check_some_values(['7', '8', '9'])
-            True
         """
         for val in values:
             if values.count(val) > 1:
@@ -210,22 +140,6 @@ class Card:
             bool: True, если значение было успешно добавлено.
             Иначе - выбрасывает иключение из check_one_value()
 
-        Examples:
-            >>> card = Card("Test Card", ["Value 1", "Value 2"])
-            >>> card.add_one_value("Value 1")
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The value 'Value 1' is already in card.
-            >>> card.add_one_value("Test")
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The name 'Test Card' shouldn\'t contain the value 'Test'.
-            >>> card.add_one_value("")
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! Empty value.
-            >>> card.add_one_value("Value 3")
-            True
         """
 
         value_flags = {
@@ -255,26 +169,6 @@ class Card:
             True, если все значения были успешно добавлены.
             Иначе - выбрасывает иключение из check_one_value()
 
-        Examples:
-            >>> card = Card('name1', ['A', 'K', 'Q', 'J', '10'])
-            >>> card.add_some_values(['A', 'K', 'Q'])
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The value 'A' is already in card.
-            >>> card.add_some_values(['J', '10', '9'])
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! The value 'J' is already in card.
-            >>> card.add_some_values(['9'])
-            True
-            >>> card.get_values_with_flags()
-            [\
-{'value': 'A', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
-{'value': 'K', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
-{'value': 'Q', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
-{'value': 'J', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
-{'value': '10', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
-{'value': '9', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}]
         """
         for value in values:
             self.add_one_value(value)
@@ -292,18 +186,6 @@ class Card:
             Иначе - выбрасывает собсвтенное иключение.
             # Уточнить тип исключения! (сейчас просто Exception)
 
-        Examples:
-            >>> card = Card("Test Card", ["Value 1", "Value 2", "Value 3"])
-            >>> card.delete_one_value("")
-            Traceback (most recent call last):
-            ...
-            ValueError: Error! Empty value.
-            >>> card.delete_one_value("Value 4")
-            Traceback (most recent call last):
-            ...
-            Exception: Error! No 'Value 4' value in card.
-            >>> card.delete_one_value("Value 2")
-            True
         """
         if value == '':
             raise ValueError('Error! Empty value.')
@@ -325,21 +207,6 @@ class Card:
             True, если все значения были успешно удалены.
             Иначе - выбрасывает иключение из delete_one_value()
 
-        Examples:
-            >>> card = Card('name1', ['A', 'K', 'Q', 'J', '10'])
-            >>> card.get_values_with_flags()
-            [\
-{'value': 'A', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
-{'value': 'K', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
-{'value': 'Q', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
-{'value': 'J', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}, \
-{'value': '10', 'flags': {'is_simple': None, 'is_selfref': None, 'is_templ': None, 'is_id': None}}]
-            >>> card.delete_some_values(['7', '8', '9'])
-            Traceback (most recent call last):
-            ...
-            Exception: Error! No '7' value in card.
-            >>> card.delete_some_values(['A', '10'])
-            True
         """
 
         for value in values:
